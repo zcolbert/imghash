@@ -15,7 +15,13 @@ int main(int argc, char** argv)
         printf("Failed to load %s\n", filename);
         return 1;
     }
-    phash(p_img, HASH_SIZE_PIXELS);
+    uint64_t hashval = 0;
+
+    for (int i=0; i<100; ++i) 
+    {
+        hashval = phash(p_img, HASH_SIZE_PIXELS);
+    }
     printf("it worked?\n");
+    printf("Hash value: %u\n", hashval);
     return 0;
 }

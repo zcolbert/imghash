@@ -45,13 +45,10 @@ void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
     vips_region_prepare(region, &r); /* fill region with pixels */
 
     VipsPel *pixval;
-    int x = 0;
-    int y = 0;
     int pos = 0;
-    while (++y <= rows)
+    for (int y=0; y < rows; ++y)
     {
-        x = 0;
-        while (++x <= cols)
+        for (int x=0; x < rows; ++x)
         {
             pixval = VIPS_REGION_ADDR(region, x, y);
             out_arr[pos] = *pixval;
@@ -65,7 +62,6 @@ uint64_t phash(VipsImage *img, size_t size)
 {
     VipsImage *tmp;
 
-    //resize(img, tmp, size);
     vips_resize(
         img, &tmp, 
         scale_factor(size, vips_image_get_width(img)),              /* hscale */
@@ -75,6 +71,10 @@ uint64_t phash(VipsImage *img, size_t size)
     vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     /* convert to greyscale */
 
     int values[size*size];
+    for (size_t i=0; i<size*size; ++i)
+    {
+        values[i] = 0;
+    }
     pixel_values(tmp, values, size, size);
     return avg_hash(values, size*size);
 }

@@ -28,23 +28,6 @@ uint64_t avg_hash(int *values, size_t len)
     return hashval;
 }
 
-void convert_to_grayscale(VipsImage *img)
-{
-    switch ( vips_image_get_interpretation(img) )
-    {
-        case VIPS_INTERPRETATION_sRGB:
-            vips_sRGB2scRGB(img, &img, NULL);
-            vips_scRGB2BW(img, &img, NULL);
-            break;
-        case VIPS_INTERPRETATION_scRGB:
-            vips_scRGB2BW(img, &img, NULL);
-            break;
-        default: 
-            printf("Invalid color channel\n");
-            break;
-    }
-}
-
 void resize(VipsImage *img, VipsImage *out, size_t size)
 {
     vips_resize(
@@ -65,10 +48,10 @@ void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
     int x = 0;
     int y = 0;
     int pos = 0;
-    while (++y < rows)
+    while (++y <= rows)
     {
         x = 0;
-        while (++x < cols)
+        while (++x <= cols)
         {
             pixval = VIPS_REGION_ADDR(region, x, y);
             out_arr[pos] = *pixval;
@@ -89,7 +72,7 @@ uint64_t phash(VipsImage *img, size_t size)
         "vscale", scale_factor(size, vips_image_get_height(img)),   /* vscale */
         NULL
     );
-    convert_to_grayscale(tmp);
+    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     /* convert to greyscale */
 
     int values[size*size];
     pixel_values(tmp, values, size, size);

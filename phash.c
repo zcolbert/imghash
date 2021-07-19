@@ -48,7 +48,7 @@ void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
     int pos = 0;
     for (int y=0; y < rows; ++y)
     {
-        for (int x=0; x < rows; ++x)
+        for (int x=0; x < cols; ++x)
         {
             pixval = VIPS_REGION_ADDR(region, x, y);
             out_arr[pos] = *pixval;
@@ -71,10 +71,6 @@ uint64_t phash(VipsImage *img, size_t size)
     vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     /* convert to greyscale */
 
     int values[size*size];
-    for (size_t i=0; i<size*size; ++i)
-    {
-        values[i] = 0;
-    }
     pixel_values(tmp, values, size, size);
     return avg_hash(values, size*size);
 }

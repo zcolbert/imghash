@@ -74,29 +74,6 @@ uint64_t phash(VipsImage *img, size_t size)
     pixel_values(tmp, values, size, size);
     return avg_hash(values, size*size);
 }
-void phash_array(VipsImage *img, int *out, size_t size)
-{
-    VipsImage *tmp;
-
-    vips_resize(
-        img, &tmp, 
-        scale_factor(size, vips_image_get_width(img)),              /* hscale */
-        "vscale", scale_factor(size, vips_image_get_height(img)),   /* vscale */
-        NULL
-    );
-    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     /* convert to greyscale */
-
-    int values[size*size];
-    pixel_values(tmp, values, size, size);
-
-
-    float avg = average(values, size*size);
-    for (int i=0; i<size*size; ++i)
-    {
-        out[i] = values[i] < avg ? 1 : 0;
-    }
-}
-
 double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;

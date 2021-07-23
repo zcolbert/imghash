@@ -12,10 +12,10 @@ void resize(VipsImage *img, VipsImage *out, size_t size);
 
 uint64_t avg_hash(int *values, size_t len);
 uint64_t phash(VipsImage *img, size_t size);
+uint64_t imghash();
 
 void avg_hash_array(int *values, int *out, size_t len);
 void phash_array(VipsImage *img, int *out, size_t size);
-
 
 
 #endif  // IMGHASH_H

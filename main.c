@@ -19,13 +19,20 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    uint64_t old = dhash(p_img);
     uint64_t hashval = 0;
-    size_t iterations = 100000;
-    for (int i=0; i<100; ++i)
+
+    int errors = 0;
+    for (int i=0; i < 10000; ++i)
     {
-        hashval = ahash(p_img);
+        hashval = dhash(p_img);
         printf("%lu\n", hashval);
+        if (hashval != old)
+            ++errors;
+        old = hashval;
     }
+    printf("Errors: %d\n", errors);
+    printf("Hash size: %d\n", HASH_SIZE);
 
     //measure_hash_iterations(iterations, array_hash_func_ptr);
     //measure_hash_iterations(iterations, phash_func_ptr);

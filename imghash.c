@@ -73,6 +73,41 @@ uint64_t ahash(VipsImage *img)
     }
     return hashval;
 }
+uint64_t dhash(VipsImage *img)
+{
+    VipsImage *tmp;
+
+    // Increase row width by one since number of comparisons is width - 1
+    const int px_per_row = HASH_PX_PER_ROW + 1;  
+    // Update total pixel count to reflect increased row width
+    const int num_px = HASH_NUM_OF_ROWS * px_per_row;
+    // Scale the image down and convert to grayscale
+    vips_resize(
+        img, &tmp, 
+        scale_factor(px_per_row, vips_image_get_width(img)),          // hscale
+        "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
+        NULL
+    );
+    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
+
+
+    /* TODO factor into a helper function */
+    // Compute the bit string
+    // Set a 1 for each pixel that is darker than the preceding pixel, otherwise set 0
+    int values[num_px];
+    pixel_values(tmp, values, HASH_NUM_OF_ROWS, px_per_row); 
+    uint64_t hashval = 0;
+    uint64_t mask = pow(2.0, 63.0);
+
+    for (int i=0; i<num_px; ++i)
+    {
+        if (values[i] < values[i+1]) {
+            hashval |= mask;
+        }
+        mask >>= 1;
+    }
+    return hashval;
+}
 double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;

@@ -1,5 +1,5 @@
-#ifndef PHASH_H
-#define PHASH_H
+#ifndef IMGHASH_H 
+#define IMGHASH_H
 
 #include <stdint.h>
 #include <vips/vips.h>
@@ -18,4 +18,4 @@ void phash_array(VipsImage *img, int *out, size_t size);
 
 
 
-#endif
+#endif  // IMGHASH_H

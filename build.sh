@@ -1,1 +1,1 @@
-gcc -g -Wall main.c phash.c `pkg-config vips --cflags --libs`
+gcc -g -Wall main.c imghash.c `pkg-config vips --cflags --libs`

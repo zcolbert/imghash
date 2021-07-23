@@ -3,7 +3,7 @@
 
 #include <vips/vips.h>
 
-#include "phash.h"
+#include "imghash.h"
 
 
 #define HASH_SIZE_PIXELS 8

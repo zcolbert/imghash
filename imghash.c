@@ -1,4 +1,4 @@
-#include "phash.h"
+#include "imghash.h"
 
 
 float average(int *values, size_t len)

@@ -79,4 +79,3 @@ double scale_factor(int dim_new, int dim_current)
     return (double)dim_new/(double)dim_current;
 }
 
-

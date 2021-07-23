@@ -11,7 +11,7 @@
 
 int main(int argc, char** argv)
 {
-    char *filename = "vanagon.jpg\0";
+    char *filename = "images/vanagon.jpg\0";
     VipsImage *p_img = vips_image_new_from_file(filename, NULL);
     if (p_img == NULL)
     {

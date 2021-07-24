@@ -8,6 +8,22 @@
 
 #define HASH_SIZE_PIXELS 8
 
+void compare(char *path1, char *path2)
+{
+    VipsImage *p_img1 = vips_image_new_from_file(path1, NULL);
+    VipsImage *p_img2 = vips_image_new_from_file(path2, NULL);
+
+    if (p_img1 == NULL || p_img2 == NULL) {
+        printf("Failed to load image\n");
+        return;
+    }
+
+    printf("Comparing \"%s\" vs \"%s\":\n", path1, path2);
+    printf("ahash difference: %u\n", distance(ahash(p_img1), ahash(p_img2)));
+    printf("dhash difference: %u\n", distance(dhash(p_img1), dhash(p_img2)));
+    printf("\n");
+}
+
 
 int main(int argc, char** argv)
 {
@@ -18,24 +34,17 @@ int main(int argc, char** argv)
         printf("Failed to load %s\n", filename);
         return 1;
     }
+    //VipsImage *tmp;
+    //vips_resize(p_img, &tmp, 0.95, NULL);
+    //vips_image_write_to_file(tmp, "vanagon_95pct.jpg", NULL);
 
-    uint64_t old = dhash(p_img);
-    uint64_t hashval = 0;
-
-    int errors = 0;
-    for (int i=0; i < 10000; ++i)
-    {
-        hashval = dhash(p_img);
-        printf("%lu\n", hashval);
-        if (hashval != old)
-            ++errors;
-        old = hashval;
-    }
-    printf("Errors: %d\n", errors);
-    printf("Hash size: %d\n", HASH_SIZE);
-
-    //measure_hash_iterations(iterations, array_hash_func_ptr);
-    //measure_hash_iterations(iterations, phash_func_ptr);
+    compare("images/vanagon.jpg\0", "images/vanagon.jpg\0");
+    compare("images/vanagon.jpg\0", "images/vanagon_95pct.jpg\0");
+    compare("images/vanagon_95pct.jpg\0", "images/vanagon_95pct.jpg\0");
+    compare("images/vanagon.jpg\0", "images/half.jpg\0");
+    compare("images/vanagon.jpg\0", "images/quarter.jpg\0");
+    compare("images/half.jpg\0", "images/quarter.jpg\0");
+    compare("images/vanagon.jpg\0", "images/blacked.jpg\0");
 
     return 0;
 }

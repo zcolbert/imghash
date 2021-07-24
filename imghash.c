@@ -1,3 +1,4 @@
+#include <math.h>
 #include "imghash.h"
 
 
@@ -112,4 +113,27 @@ double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;
 }
+
+unsigned int distance(uint64_t lhs, uint64_t rhs)
+{
+    uint64_t diff = lhs ^ rhs;  // xor to compute differences
+    size_t num_bits = 8 * sizeof(uint64_t);
+
+    // set first bit in mask and zero the rest
+    uint64_t mask = 1; 
+    mask <<= (num_bits - 1);
+
+    unsigned int diff_count = 0;
+    do 
+    {
+        if (diff & mask) {
+            ++diff_count;
+        }
+    }  while (mask >>= 1);
+
+    return diff_count;
+}
+
+
+
 

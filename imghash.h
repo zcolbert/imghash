@@ -18,5 +18,7 @@ uint64_t ahash(VipsImage *img);
 uint64_t dhash(VipsImage *img);
 uint64_t phash(VipsImage *img);
 
+unsigned int distance(uint64_t lhs, uint64_t rhs);
+
 
 #endif  // IMGHASH_H

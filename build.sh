@@ -2,9 +2,9 @@
 
 
 SOURCES=(
-    main.c
-    imghash.c
-    dev.c
+    src/main.c
+    src/imghash.c
+    src/dev.c
 )
 
-gcc -g -Wall ${SOURCES[*]} -lm `pkg-config vips --cflags --libs`
+gcc -g -Wall -I "include" ${SOURCES[*]} -lm `pkg-config vips --cflags --libs`

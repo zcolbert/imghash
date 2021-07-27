@@ -91,6 +91,9 @@ int main(int argc, char** argv)
     if (fp == NULL) {
         printf("Failed to open file\n");
     }
+    printf("Running\n");
+    printf("Done\n");
+    
 
     // TODO write test code to read filenames
     // TODO write function to generate a combination of pairs

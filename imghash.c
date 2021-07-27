@@ -47,14 +47,13 @@ uint64_t ahash(VipsImage *img)
     VipsImage *tmp;
 
     // Scale the image down and convert to grayscale
+    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // onvert to greyscale
     vips_resize(
         img, &tmp, 
         scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),              // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL
     );
-    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
-
 
     /* TODO factor into a helper function */
     // Compute the bit string
@@ -83,20 +82,20 @@ uint64_t dhash(VipsImage *img)
     // Update total pixel count to reflect increased row width
     const int num_px = HASH_NUM_OF_ROWS * px_per_row;
     // Scale the image down and convert to grayscale
+    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
     vips_resize(
         img, &tmp, 
         scale_factor(px_per_row, vips_image_get_width(img)),          // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL
     );
-    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
-
 
     /* TODO factor into a helper function */
     // Compute the bit string
     // Set a 1 for each pixel that is darker than the preceding pixel, otherwise set 0
     int values[num_px];
     pixel_values(tmp, values, HASH_NUM_OF_ROWS, px_per_row); 
+    //print_array(values, num_px);
     uint64_t hashval = 0;
     uint64_t mask = pow(2.0, 63.0);
 

@@ -49,7 +49,7 @@ uint64_t ahash(VipsImage *img)
     // Scale the image down and convert to grayscale
     vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // onvert to greyscale
     vips_resize(
-        img, &tmp, 
+        tmp, &tmp, 
         scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),              // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL
@@ -84,7 +84,7 @@ uint64_t dhash(VipsImage *img)
     // Scale the image down and convert to grayscale
     vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
     vips_resize(
-        img, &tmp, 
+        tmp, &tmp, 
         scale_factor(px_per_row, vips_image_get_width(img)),          // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL

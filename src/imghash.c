@@ -12,16 +12,6 @@ float average(int *values, size_t len)
 }
 
 
-void resize(VipsImage *img, VipsImage *out, size_t size)
-{
-    vips_resize(
-        img, &out, 
-        scale_factor(size, vips_image_get_width(img)),              /* hscale */
-        "vscale", scale_factor(size, vips_image_get_height(img)),   /* vscale */
-        NULL
-    );
-}
-
 void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
 {
     VipsRegion *region = vips_region_new(img);
@@ -47,13 +37,13 @@ uint64_t ahash(VipsImage *img)
     VipsImage *tmp;
 
     // Scale the image down and convert to grayscale
-    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // onvert to greyscale
     vips_resize(
-        tmp, &tmp, 
+        img, &tmp, 
         scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),              // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL
     );
+    vips_colourspace(tmp, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // onvert to greyscale
 
     /* TODO factor into a helper function */
     // Compute the bit string
@@ -73,6 +63,7 @@ uint64_t ahash(VipsImage *img)
     }
     return hashval;
 }
+
 uint64_t dhash(VipsImage *img)
 {
     VipsImage *tmp;
@@ -82,13 +73,13 @@ uint64_t dhash(VipsImage *img)
     // Update total pixel count to reflect increased row width
     const int num_px = HASH_NUM_OF_ROWS * px_per_row;
     // Scale the image down and convert to grayscale
-    vips_colourspace(img, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
     vips_resize(
-        tmp, &tmp, 
-        scale_factor(px_per_row, vips_image_get_width(img)),          // hscale
-        "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
+        img, &tmp, 
+        scale_factor(px_per_row, vips_image_get_width(img)),                    // hscale
+        "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),   // vscale
         NULL
     );
+    vips_colourspace(tmp, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
 
     /* TODO factor into a helper function */
     // Compute the bit string

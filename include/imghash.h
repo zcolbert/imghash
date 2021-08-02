@@ -11,12 +11,11 @@
 
 
 float average(int *values, size_t len);
-double scale_factor(int dim_new, int dim_current);
-void pixel_values(VipsImage* img, int* out_arr, size_t rows, size_t cols);
+static double scale_factor(int dim_new, int dim_current);
+static void pixel_values(VipsImage* img, int* out_arr, size_t rows, size_t cols);
 
 uint64_t ahash(VipsImage *img);
 uint64_t dhash(VipsImage *img);
-uint64_t phash(VipsImage *img);
 
 unsigned int distance(uint64_t lhs, uint64_t rhs);
 

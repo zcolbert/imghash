@@ -11,8 +11,12 @@ float average(int *values, size_t len)
     return (float)sum / (float)len;
 }
 
+static double scale_factor(int dim_new, int dim_current)
+{
+    return (double)dim_new/(double)dim_current;
+}
 
-void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
+static void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
 {
     VipsRegion *region = vips_region_new(img);
     VipsRect r = { left:0, top:0, width:cols, height:rows };
@@ -98,10 +102,6 @@ uint64_t dhash(VipsImage *img)
         mask >>= 1;
     }
     return hashval;
-}
-double scale_factor(int dim_new, int dim_current)
-{
-    return (double)dim_new/(double)dim_current;
 }
 
 unsigned int distance(uint64_t lhs, uint64_t rhs)

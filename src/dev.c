@@ -1,6 +1,8 @@
+#include <math.h>
 #include <stdio.h>
 
 #include "dev.h"
+
 
 
 void listdir(char *path)
@@ -13,10 +15,6 @@ void listdir(char *path)
         printf("%s\n", files->d_name);
     }
     closedir(dir);
-}
-
-void listdir_by_type(char *path, char *type)
-{
 }
 
 void print_array(int *arr_vals, size_t len)

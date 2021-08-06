@@ -141,7 +141,7 @@ int main(int argc, char** argv)
     /* iterate filenames and construct a path */
     char *dir = "images/\0";
     char path[255];
-    size_t iterations = 1000;
+    size_t iterations = 1;
     for (size_t i=0; i<=iterations; ++i) 
     {
         for (size_t j=0; j<line_count; ++j)

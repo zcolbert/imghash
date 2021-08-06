@@ -44,23 +44,37 @@ int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
     return EXIT_SUCCESS;
 }
 
+VipsImage *resize(VipsImage *in, size_t width, size_t height)
+{
+    VipsImage *out = NULL;
+    vips_resize(
+        in, &out, 
+        /*hscale*/ scale_factor(width , vips_image_get_width(in)),
+        "vscale",  scale_factor(height, vips_image_get_height(in)),
+        NULL
+    );
+    return out;
+}
+
+VipsImage *convert_to_grayscale(VipsImage *in)
+{
+    VipsImage *out= NULL;
+    vips_colourspace(in, &out, VIPS_INTERPRETATION_B_W, NULL);
+    return out;
+}
+
 uint64_t ahash(VipsImage *img)
 {
     assert(img != NULL);
+
     VipsImage *resized = NULL;
     VipsImage *grayscaled = NULL;
 
-    vips_resize(
-        img, &resized, 
-        /*hscale*/ scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),    // hscale
-        "vscale",  scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
-        NULL
-    );
+    resized = resize(img, HASH_PX_PER_ROW, HASH_NUM_OF_ROWS);
     assert(vips_image_get_width(resized) == HASH_PX_PER_ROW);
     assert(vips_image_get_height(resized) == HASH_NUM_OF_ROWS);
 
-    vips_colourspace(resized, &grayscaled, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
-
+    grayscaled = convert_to_grayscale(resized);
 
     int values[HASH_SIZE];
     pixel_values(grayscaled, values, HASH_NUM_OF_ROWS, HASH_PX_PER_ROW); 
@@ -93,13 +107,11 @@ uint64_t dhash(VipsImage *img)
     // Update total pixel count to reflect increased row width
     const int num_px = HASH_NUM_OF_ROWS * px_per_row;
     // Scale the image down and convert to grayscale
-    vips_resize(
-        img, &resized, 
-        scale_factor(px_per_row, vips_image_get_width(img)),                    // hscale
-        "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),   // vscale
-        NULL
-    );
-    vips_colourspace(resized, &grayscaled, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
+    resized = resize(img, px_per_row, HASH_NUM_OF_ROWS);
+    assert(vips_image_get_width(resized) == px_per_row);
+    assert(vips_image_get_height(resized) == HASH_NUM_OF_ROWS);
+
+    grayscaled = convert_to_grayscale(resized);
 
     // Compute the bit string
     // Set a 1 for each pixel that is darker than the preceding pixel, otherwise set 0

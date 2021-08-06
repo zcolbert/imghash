@@ -1,4 +1,6 @@
+#include <assert.h>
 #include <math.h>
+
 #include "imghash.h"
 
 
@@ -11,52 +13,61 @@ float average(int *values, size_t len)
     return (float)sum / (float)len;
 }
 
-static double scale_factor(int dim_new, int dim_current)
+double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;
 }
 
-static void pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
+int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
 {
-    VipsRegion *region = vips_region_new(img);
-    VipsRect r = { left:0, top:0, width:cols, height:rows };
-    vips_region_prepare(region, &r); // fill region with pixels
+    assert(img != NULL);
 
-    VipsPel *pixval;
+    VipsRegion *region = NULL;
+    if ( !(region = vips_region_new(img)) ) {
+        return EXIT_FAILURE;
+    }
+
+    VipsRect r = { left: 0, top: 0, width: cols, height: rows };
+    vips_region_prepare(region, &r);
+
     int pos = 0;
-    for (int y=0; y < rows; ++y)
+    VipsPel *pxval;
+    for (int y=0; y<rows; ++y)
     {
-        for (int x=0; x < cols; ++x)
+        for (int x=0; x<cols; ++x)
         {
-            pixval = VIPS_REGION_ADDR(region, x, y);
-            out_arr[pos] = *pixval;
-            ++pos;
+            pxval = VIPS_REGION_ADDR(region, x, y); 
+            out_arr[pos++] = *pxval;
         }
     }
     g_object_unref(region);
+    return EXIT_SUCCESS;
 }
 
 uint64_t ahash(VipsImage *img)
 {
-    VipsImage *tmp;
+    assert(img != NULL);
+    VipsImage *resized = NULL;
+    VipsImage *grayscaled = NULL;
 
-    // Scale the image down and convert to grayscale
     vips_resize(
-        img, &tmp, 
-        scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),              // hscale
-        "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
+        img, &resized, 
+        /*hscale*/ scale_factor(HASH_PX_PER_ROW, vips_image_get_width(img)),    // hscale
+        "vscale",  scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),  // vscale
         NULL
     );
-    vips_colourspace(tmp, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // onvert to greyscale
+    assert(vips_image_get_width(resized) == HASH_PX_PER_ROW);
+    assert(vips_image_get_height(resized) == HASH_NUM_OF_ROWS);
 
-    /* TODO factor into a helper function */
-    // Compute the bit string
-    // Set a 1 for each pixel that is less than the avg value, otherwise set 0
+    vips_colourspace(resized, &grayscaled, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
+
+
     int values[HASH_SIZE];
-    pixel_values(tmp, values, HASH_NUM_OF_ROWS, HASH_PX_PER_ROW); 
+    pixel_values(grayscaled, values, HASH_NUM_OF_ROWS, HASH_PX_PER_ROW); 
+
     float avg = average(values, HASH_SIZE);
     uint64_t hashval = 0;
-    uint64_t mask = pow(2.0, 63.0);
+    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
 
     for (int i=0; i<HASH_SIZE; ++i)
     {
@@ -65,34 +76,38 @@ uint64_t ahash(VipsImage *img)
         }
         mask >>= 1;
     }
+
+    g_object_unref(grayscaled);
+    g_object_unref(resized);
+
     return hashval;
 }
 
 uint64_t dhash(VipsImage *img)
 {
-    VipsImage *tmp;
-
+    assert(img != NULL);
+    VipsImage *resized = NULL;
+    VipsImage *grayscaled = NULL;
     // Increase row width by one since number of comparisons is width - 1
     const int px_per_row = HASH_PX_PER_ROW + 1;  
     // Update total pixel count to reflect increased row width
     const int num_px = HASH_NUM_OF_ROWS * px_per_row;
     // Scale the image down and convert to grayscale
     vips_resize(
-        img, &tmp, 
+        img, &resized, 
         scale_factor(px_per_row, vips_image_get_width(img)),                    // hscale
         "vscale", scale_factor(HASH_NUM_OF_ROWS, vips_image_get_height(img)),   // vscale
         NULL
     );
-    vips_colourspace(tmp, &tmp, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
+    vips_colourspace(resized, &grayscaled, VIPS_INTERPRETATION_B_W, NULL);     // convert to greyscale
 
-    /* TODO factor into a helper function */
     // Compute the bit string
     // Set a 1 for each pixel that is darker than the preceding pixel, otherwise set 0
     int values[num_px];
-    pixel_values(tmp, values, HASH_NUM_OF_ROWS, px_per_row); 
-    //print_array(values, num_px);
+    pixel_values(grayscaled, values, HASH_NUM_OF_ROWS, px_per_row); 
+
     uint64_t hashval = 0;
-    uint64_t mask = pow(2.0, 63.0);
+    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
 
     for (int i=0; i<num_px; ++i)
     {
@@ -101,6 +116,10 @@ uint64_t dhash(VipsImage *img)
         }
         mask >>= 1;
     }
+
+    g_object_unref(grayscaled);
+    g_object_unref(resized);
+
     return hashval;
 }
 

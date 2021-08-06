@@ -7,4 +7,4 @@ SOURCES=(
     src/dev.c
 )
 
-gcc -g -Wall -I "include" ${SOURCES[*]} -lm `pkg-config vips --cflags --libs`
+gcc -g -Wall -DDEBUG -I "include" ${SOURCES[*]} -lm `pkg-config vips --cflags --libs`

@@ -4,13 +4,18 @@
 #include "imghash.h"
 
 
-float average(int *values, size_t len)
+int sum(int *values, size_t len)
 {
     int sum = 0;
     for (size_t i=0; i<len; ++i) {
         sum += values[i];
     }
-    return (float)sum / (float)len;
+    return sum;
+}
+
+float average(int *values, size_t len)
+{
+    return (float)sum(values, len) / (float)len;
 }
 
 double scale_factor(int dim_new, int dim_current)
@@ -46,6 +51,8 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
 
 VipsImage *resize(VipsImage *in, size_t width, size_t height)
 {
+    assert(in != NULL);
+
     VipsImage *out = NULL;
     vips_resize(
         in, &out, 
@@ -53,11 +60,17 @@ VipsImage *resize(VipsImage *in, size_t width, size_t height)
         "vscale",  scale_factor(height, vips_image_get_height(in)),
         NULL
     );
+
+    assert(vips_image_get_width(out) == width);
+    assert(vips_image_get_height(out) == height);
+
     return out;
 }
 
 VipsImage *convert_to_grayscale(VipsImage *in)
 {
+    assert(in != NULL);
+
     VipsImage *out= NULL;
     vips_colourspace(in, &out, VIPS_INTERPRETATION_B_W, NULL);
     return out;
@@ -108,15 +121,15 @@ static uint64_t compute_bit_string_dhash(VipsImage *img, const unsigned int heig
 
 uint64_t ahash(VipsImage *img)
 {
-    assert(img != NULL);
+    if (img == NULL) {
+        return 0;
+    }
 
     VipsImage *resized = NULL;
     VipsImage *grayscaled = NULL;
 
+    // Reduce detail by scaling the image down and converting to grayscale
     resized = resize(img, HASH_PX_PER_ROW, HASH_NUM_OF_ROWS);
-    assert(vips_image_get_width(resized) == HASH_PX_PER_ROW);
-    assert(vips_image_get_height(resized) == HASH_NUM_OF_ROWS);
-
     grayscaled = convert_to_grayscale(resized);
 
     uint64_t hashval = compute_bit_string_ahash(
@@ -124,6 +137,7 @@ uint64_t ahash(VipsImage *img)
                             vips_image_get_height(grayscaled), 
                             vips_image_get_width(grayscaled));
 
+    // Unreference image objects to deallocate memory
     g_object_unref(grayscaled);
     g_object_unref(resized);
 
@@ -132,16 +146,18 @@ uint64_t ahash(VipsImage *img)
 
 uint64_t dhash(VipsImage *img)
 {
-    assert(img != NULL);
+    if (img == NULL) {
+        return 0;
+    }
+
     VipsImage *resized = NULL;
     VipsImage *grayscaled = NULL;
+
     // Increase row width by one since number of comparisons is width - 1
     const int px_per_row = HASH_PX_PER_ROW + 1;  
-    // Scale the image down and convert to grayscale
-    resized = resize(img, px_per_row, HASH_NUM_OF_ROWS);
-    assert(vips_image_get_width(resized) == px_per_row);
-    assert(vips_image_get_height(resized) == HASH_NUM_OF_ROWS);
 
+    // Reduce detail by scaling the image down and converting to grayscale
+    resized = resize(img, px_per_row, HASH_NUM_OF_ROWS);
     grayscaled = convert_to_grayscale(resized);
 
     uint64_t hashval = compute_bit_string_dhash(
@@ -149,6 +165,7 @@ uint64_t dhash(VipsImage *img)
                             vips_image_get_height(grayscaled), 
                             vips_image_get_width(grayscaled));
 
+    // Unreference image objects to deallocate memory
     g_object_unref(grayscaled);
     g_object_unref(resized);
 
@@ -157,10 +174,13 @@ uint64_t dhash(VipsImage *img)
 
 unsigned int distance(uint64_t lhs, uint64_t rhs)
 {
+    if (lhs == rhs) {
+        return 0;
+    }
     uint64_t diff = lhs ^ rhs;  // xor to compute differences
     size_t num_bits = 8 * sizeof(uint64_t);
 
-    // set first bit in mask and zero the rest
+    // Set first bit in mask and zero the rest
     uint64_t mask = 1; 
     mask <<= (num_bits - 1);
 
@@ -174,7 +194,4 @@ unsigned int distance(uint64_t lhs, uint64_t rhs)
 
     return diff_count;
 }
-
-
-
 

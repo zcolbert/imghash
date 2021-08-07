@@ -18,7 +18,7 @@ double scale_factor(int dim_new, int dim_current)
     return (double)dim_new/(double)dim_current;
 }
 
-int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
+int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
 {
     assert(img != NULL);
 
@@ -27,14 +27,14 @@ int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols)
         return EXIT_FAILURE;
     }
 
-    VipsRect r = { left: 0, top: 0, width: cols, height: rows };
+    VipsRect r = { left: 0, top: 0, width: width, height: height };
     vips_region_prepare(region, &r);
 
     int pos = 0;
     VipsPel *pxval;
-    for (int y=0; y<rows; ++y)
+    for (int y=0; y<height; ++y)
     {
-        for (int x=0; x<cols; ++x)
+        for (int x=0; x<width; ++x)
         {
             pxval = VIPS_REGION_ADDR(region, x, y); 
             out_arr[pos++] = *pxval;
@@ -63,6 +63,49 @@ VipsImage *convert_to_grayscale(VipsImage *in)
     return out;
 }
 
+static uint64_t compute_bit_string_ahash(VipsImage *img, const unsigned int height, const unsigned int width)
+{
+    assert(img != NULL);
+
+    const unsigned int hash_size = height * width;
+    int values[hash_size];
+    pixel_values(img, values, height, width); 
+
+    float avg = average(values, hash_size);
+    uint64_t hashval = 0;
+    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
+
+    for (int i=0; i<HASH_SIZE; ++i)
+    {
+        if (values[i] < avg) {
+            hashval |= mask;
+        }
+        mask >>= 1;
+    }
+    return hashval;
+}
+
+static uint64_t compute_bit_string_dhash(VipsImage *img, const unsigned int height, const unsigned int width)
+{
+    assert(img != NULL);
+
+    const unsigned int hash_size = height * width;
+    int values[hash_size];
+    pixel_values(img, values, height, width); 
+
+    uint64_t hashval = 0;
+    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
+
+    for (int i=0; i<hash_size; ++i)
+    {
+        if (values[i] < values[i+1]) {
+            hashval |= mask;
+        }
+        mask >>= 1;
+    }
+    return hashval;
+}
+
 uint64_t ahash(VipsImage *img)
 {
     assert(img != NULL);
@@ -76,20 +119,10 @@ uint64_t ahash(VipsImage *img)
 
     grayscaled = convert_to_grayscale(resized);
 
-    int values[HASH_SIZE];
-    pixel_values(grayscaled, values, HASH_NUM_OF_ROWS, HASH_PX_PER_ROW); 
-
-    float avg = average(values, HASH_SIZE);
-    uint64_t hashval = 0;
-    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
-
-    for (int i=0; i<HASH_SIZE; ++i)
-    {
-        if (values[i] < avg) {
-            hashval |= mask;
-        }
-        mask >>= 1;
-    }
+    uint64_t hashval = compute_bit_string_ahash(
+                            grayscaled, 
+                            vips_image_get_height(grayscaled), 
+                            vips_image_get_width(grayscaled));
 
     g_object_unref(grayscaled);
     g_object_unref(resized);
@@ -104,8 +137,6 @@ uint64_t dhash(VipsImage *img)
     VipsImage *grayscaled = NULL;
     // Increase row width by one since number of comparisons is width - 1
     const int px_per_row = HASH_PX_PER_ROW + 1;  
-    // Update total pixel count to reflect increased row width
-    const int num_px = HASH_NUM_OF_ROWS * px_per_row;
     // Scale the image down and convert to grayscale
     resized = resize(img, px_per_row, HASH_NUM_OF_ROWS);
     assert(vips_image_get_width(resized) == px_per_row);
@@ -113,21 +144,10 @@ uint64_t dhash(VipsImage *img)
 
     grayscaled = convert_to_grayscale(resized);
 
-    // Compute the bit string
-    // Set a 1 for each pixel that is darker than the preceding pixel, otherwise set 0
-    int values[num_px];
-    pixel_values(grayscaled, values, HASH_NUM_OF_ROWS, px_per_row); 
-
-    uint64_t hashval = 0;
-    uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
-
-    for (int i=0; i<num_px; ++i)
-    {
-        if (values[i] < values[i+1]) {
-            hashval |= mask;
-        }
-        mask >>= 1;
-    }
+    uint64_t hashval = compute_bit_string_dhash(
+                            grayscaled, 
+                            vips_image_get_height(grayscaled), 
+                            vips_image_get_width(grayscaled));
 
     g_object_unref(grayscaled);
     g_object_unref(resized);

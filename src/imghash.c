@@ -172,6 +172,28 @@ uint64_t dhash(VipsImage *img)
     return hashval;
 }
 
+uint64_t ahash_from_file(char *filename)
+{
+    VipsImage *img = vips_image_new_from_file(filename, NULL);
+    if (img == NULL) {
+        return 0;
+    }
+    uint64_t value = ahash(img);
+    g_object_unref(img);
+    return value;
+}
+
+uint64_t dhash_from_file(char *filename)
+{
+    VipsImage *img = vips_image_new_from_file(filename, NULL);
+    if (img == NULL) {
+        return 0;
+    }
+    uint64_t value = dhash(img);
+    g_object_unref(img);
+    return value;
+}
+
 unsigned int distance(uint64_t lhs, uint64_t rhs)
 {
     if (lhs == rhs) {

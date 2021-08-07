@@ -18,6 +18,9 @@ float average(int *values, size_t len);
 uint64_t ahash(VipsImage *img);
 uint64_t dhash(VipsImage *img);
 
+uint64_t ahash_from_file(char *filename);
+uint64_t dhash_from_file(char *filename);
+
 double scale_factor(int dim_new, int dim_current);
 int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols);
 

@@ -51,7 +51,7 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
 
     VipsRegion *region = NULL;
     if ( !(region = vips_region_new(img)) ) {
-        return EXIT_FAILURE;
+        return IMGHASH_EXIT_FAILURE;
     }
 
     VipsRect r = { left: 0, top: 0, width: width, height: height };
@@ -68,7 +68,7 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
         }
     }
     g_object_unref(region);
-    return EXIT_SUCCESS;
+    return IMGHASH_EXIT_SUCCESS;
 }
 
 VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new)

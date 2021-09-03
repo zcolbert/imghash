@@ -21,8 +21,8 @@
 #define HASH_NUM_OF_ROWS 8
 #define HASH_SIZE HASH_PX_PER_ROW*HASH_NUM_OF_ROWS
 
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
+#define IMGHASH_EXIT_SUCCESS 0
+#define IMGHASH_EXIT_FAILURE 1
 
 
 // Functions for calculating hash from a VipsImage

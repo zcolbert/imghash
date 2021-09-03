@@ -1,3 +1,15 @@
+/******************************************************************************
+* Name:     imghash.c
+* Author:   Zachary Colbert <zcolbert1993@gmail.com>
+* Purpose:  Definitions for image hashing functions and their helper functions.
+*
+* Description:
+*
+*   This file provides implementation for various image hashing methods
+*   and their associated helpers. 
+******************************************************************************/
+
+
 #include <assert.h>
 #include <math.h>
 
@@ -5,6 +17,7 @@
 
 
 int sum(int *values, size_t len)
+/* Return the sum of values */
 {
     int sum = 0;
     for (size_t i=0; i<len; ++i) {
@@ -14,16 +27,25 @@ int sum(int *values, size_t len)
 }
 
 float average(int *values, size_t len)
+/* Return the average of values */
 {
     return (float)sum(values, len) / (float)len;
 }
 
 double scale_factor(int dim_new, int dim_current)
+/* 
+    Return the multiplication factor required to produce dim_new 
+    from dim_current via: dim_new = dim_current * scale_factor 
+*/
 {
     return (double)dim_new/(double)dim_current;
 }
 
 int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
+/* 
+    Populate out_arr with integers representing the value of each pixel in img.
+    The length of out_arr must be equal to height * width.
+*/
 {
     assert(img != NULL);
 
@@ -50,6 +72,12 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
 }
 
 VipsImage *resize(VipsImage *in, size_t width, size_t height)
+/* 
+    Return a pointer to a new VipsImage containing the scaled contents 
+    of the original. The dimensions of the new image will be width x height.
+
+    The resulting VipsImage* must be freed using g_object_unref()
+*/
 {
     assert(in != NULL);
 
@@ -68,6 +96,12 @@ VipsImage *resize(VipsImage *in, size_t width, size_t height)
 }
 
 VipsImage *convert_to_grayscale(VipsImage *in)
+/* 
+    Return a pointer to a new VipsImage containing the data of in,
+    where color bands have been converted to grayscale.
+
+    The resulting VipsImage* must be freed using g_object_unref()
+*/
 {
     assert(in != NULL);
 
@@ -120,6 +154,7 @@ static uint64_t compute_bit_string_dhash(VipsImage *img, const unsigned int heig
 }
 
 uint64_t ahash(VipsImage *img)
+/* Calculate an average hash from the pixels in img. */
 {
     if (img == NULL) {
         return 0;
@@ -145,6 +180,7 @@ uint64_t ahash(VipsImage *img)
 }
 
 uint64_t dhash(VipsImage *img)
+/* Calculate a difference hash from the pixels in img. */
 {
     if (img == NULL) {
         return 0;
@@ -173,6 +209,7 @@ uint64_t dhash(VipsImage *img)
 }
 
 uint64_t ahash_from_file(char *filename)
+/* Open the image file located at filename and calculate an average hash. */
 {
     VipsImage *img = vips_image_new_from_file(filename, NULL);
     if (img == NULL) {
@@ -184,6 +221,7 @@ uint64_t ahash_from_file(char *filename)
 }
 
 uint64_t dhash_from_file(char *filename)
+/* Open the image file located at filename and calculate a difference hash. */
 {
     VipsImage *img = vips_image_new_from_file(filename, NULL);
     if (img == NULL) {
@@ -195,6 +233,7 @@ uint64_t dhash_from_file(char *filename)
 }
 
 unsigned int distance(uint64_t lhs, uint64_t rhs)
+/* Return the Hamming distance between the two hash values, lhs and rhs */
 {
     if (lhs == rhs) {
         return 0;

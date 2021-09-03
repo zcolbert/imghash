@@ -112,6 +112,10 @@ VipsImage *convert_to_grayscale(VipsImage *orig)
 }
 
 static uint64_t compute_bit_string_ahash(VipsImage *img, const unsigned int height, const unsigned int width)
+/*
+    Iterate the pixel values in img and compute a bit string where each bit is
+    1 if the pixel is lighter than the image's average value, else 0.
+*/
 {
     assert(img != NULL);
 
@@ -134,6 +138,10 @@ static uint64_t compute_bit_string_ahash(VipsImage *img, const unsigned int heig
 }
 
 static uint64_t compute_bit_string_dhash(VipsImage *img, const unsigned int height, const unsigned int width)
+/*
+    Iterate the pixel values in img and compute a bit string where each bit is:
+    1 if the pixel is lighter than the immediate next pixel, else 0. 
+*/
 {
     assert(img != NULL);
 

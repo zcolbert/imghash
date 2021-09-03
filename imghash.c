@@ -127,7 +127,7 @@ static uint64_t compute_bit_string_ahash(VipsImage *img, const unsigned int heig
     uint64_t hashval = 0;
     uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
 
-    for (int i=0; i<HASH_SIZE; ++i)
+    for (int i=0; i<hash_size; ++i)
     {
         if (values[i] < avg) {
             hashval |= mask;

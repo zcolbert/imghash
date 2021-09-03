@@ -38,8 +38,9 @@ unsigned int distance(uint64_t lhs, uint64_t rhs);
 
 // Helper functions used during hashing operations
 float average(int *values, size_t len);
-double scale_factor(int dim_new, int dim_current);
 int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols);
+VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new);
+double scale_factor(int dim_new, int dim_current);
 
 
 #endif  // IMGHASH_H

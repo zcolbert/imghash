@@ -71,26 +71,27 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
     return EXIT_SUCCESS;
 }
 
-VipsImage *resize(VipsImage *in, size_t width, size_t height)
+VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new)
 /* 
     Return a pointer to a new VipsImage containing the scaled contents 
-    of the original. The dimensions of the new image will be width x height.
+    of the original. The dimensions of the new image will be width_new x height_new.
 
     The resulting VipsImage* must be freed using g_object_unref()
 */
 {
-    assert(in != NULL);
+    assert(orig!= NULL);
 
     VipsImage *out = NULL;
     vips_resize(
-        in, &out, 
-        /*hscale*/ scale_factor(width , vips_image_get_width(in)),
-        "vscale",  scale_factor(height, vips_image_get_height(in)),
+        orig, &out, 
+        /*hscale*/ scale_factor(width_new , vips_image_get_width(orig)),
+        "vscale",  scale_factor(height_new, vips_image_get_height(orig)),
         NULL
     );
 
-    assert(vips_image_get_width(out) == width);
-    assert(vips_image_get_height(out) == height);
+    // Sanity check after resizing operation
+    assert(vips_image_get_width(out) == width_new);
+    assert(vips_image_get_height(out) == height_new);
 
     return out;
 }

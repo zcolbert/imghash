@@ -49,14 +49,17 @@ int pixel_values(VipsImage *img, int *out_arr, size_t height, size_t width)
 {
     assert(img != NULL);
 
+    // Define a rectangular region in the image
     VipsRegion *region = NULL;
     if ( !(region = vips_region_new(img)) ) {
         return IMGHASH_EXIT_FAILURE;
     }
 
+    // Fill the region with width x height pixels, starting from the top-left corner
     VipsRect r = { left: 0, top: 0, width: width, height: height };
     vips_region_prepare(region, &r);
 
+    // Load the pixel values into the output array
     int pos = 0;
     VipsPel *pxval;
     for (int y=0; y<height; ++y)
@@ -119,14 +122,20 @@ static uint64_t compute_bit_string_ahash(VipsImage *img, const unsigned int heig
 {
     assert(img != NULL);
 
+    // Retrieve an array of pixel values from the image
     const unsigned int hash_size = height * width;
     int values[hash_size];
     pixel_values(img, values, height, width); 
 
+    // Calculate the average value of this image's pixels
     float avg = average(values, hash_size);
+
+    // Initialize a 64 bit mask with the left-most bit set
     uint64_t hashval = 0;
     uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
 
+    // Populate the bits of the hash by setting the current bit 
+    // if the current pixel value is lighter than the average
     for (int i=0; i<hash_size; ++i)
     {
         if (values[i] < avg) {
@@ -145,13 +154,17 @@ static uint64_t compute_bit_string_dhash(VipsImage *img, const unsigned int heig
 {
     assert(img != NULL);
 
+    // Retrieve an array of pixel values from the image
     const unsigned int hash_size = height * width;
     int values[hash_size];
     pixel_values(img, values, height, width); 
 
+    // Initialize a 64 bit mask with the left-most bit set
     uint64_t hashval = 0;
     uint64_t mask = pow(2.0, (double)(8*sizeof(uint64_t)-1));
 
+    // Populate the bits of the hash by setting the current bit if the 
+    // current pixel value is lighter than it's next immediate neighbor
     for (int i=0; i<hash_size; ++i)
     {
         if (values[i] < values[i+1]) {

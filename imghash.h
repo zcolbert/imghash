@@ -36,10 +36,13 @@ uint64_t dhash_from_file(char *filename);
 // Calculate the distance between two hashes
 unsigned int distance(uint64_t lhs, uint64_t rhs);
 
+// Image transformation functions used during hashing operations
+VipsImage *convert_to_grayscale(VipsImage *orig);
+VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new);
+
 // Helper functions used during hashing operations
 float average(int *values, size_t len);
 int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols);
-VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new);
 double scale_factor(int dim_new, int dim_current);
 
 

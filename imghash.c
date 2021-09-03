@@ -96,18 +96,18 @@ VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new)
     return out;
 }
 
-VipsImage *convert_to_grayscale(VipsImage *in)
+VipsImage *convert_to_grayscale(VipsImage *orig)
 /* 
-    Return a pointer to a new VipsImage containing the data of in,
+    Return a pointer to a new VipsImage containing the data of orig,
     where color bands have been converted to grayscale.
 
     The resulting VipsImage* must be freed using g_object_unref()
 */
 {
-    assert(in != NULL);
+    assert(orig != NULL);
 
     VipsImage *out= NULL;
-    vips_colourspace(in, &out, VIPS_INTERPRETATION_B_W, NULL);
+    vips_colourspace(orig, &out, VIPS_INTERPRETATION_B_W, NULL);
     return out;
 }
 

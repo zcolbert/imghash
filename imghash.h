@@ -43,6 +43,7 @@ VipsImage *resize(VipsImage *orig, size_t width_new, size_t height_new);
 float average(int *values, size_t len);
 int pixel_values(VipsImage *img, int *out_arr, size_t rows, size_t cols);
 double scale_factor(int dim_new, int dim_current);
+int sum(int *values, size_t len);
 
 
 #endif  // IMGHASH_H

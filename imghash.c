@@ -16,7 +16,13 @@
 #include "imghash.h"
 
 
-/* Return the sum of values */
+/** 
+ * Compute the sum of values in an array.
+ * 
+ * @param values An array of integer values
+ * @param len The number of elements in the values array 
+ * @return The sum of values in the array.
+ */
 int sum(int* values, size_t len)
 {
     int sum = 0;
@@ -26,25 +32,43 @@ int sum(int* values, size_t len)
     return sum;
 }
 
-/* Return the average of values */
+/**
+ * Compute the average of values in an array.
+ *
+ * @param values An array of integer values.
+ * @param len The number of elements in the values array.
+ * @return The average of all values (sum / length).
+ */
 float average(int* values, size_t len)
 {
     return (float)sum(values, len) / (float)len;
 }
 
-/* 
-    Return the multiplication factor required to produce dim_new 
-    from dim_current via: dim_new = dim_current * scale_factor 
-*/
+/** 
+ * Return the multiplication factor required to produce a new 
+ * dimension from the current dimension using the formula: 
+ *      dim_new = dim_current * scale_factor 
+ * 
+ * @param dim_new The desired dimension.
+ * @param dim_current The current dimension.
+ * @return scale factor = dim_new / dim_current
+ */
 double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;
 }
 
-/* 
-    Populate out_arr with integers representing the value of each pixel in img.
-    The length of out_arr must be equal to height * width.
-*/
+/** 
+ * Populate an array with integers representing the value of each 
+ * pixel in the given image. The length of the output array must 
+ * equal or exceed height * width.
+ * 
+ * @param img A pointer to a fully initialized VipsImage containing pixel data.
+ * @param out_arr The output array in which pixel values will be stored.
+ * @param height The height of the given image, in pixels.
+ * @param width The width of the given image, in pixels.
+ * @return IMGHASH_EXIT_SUCCESS if successful, else IMGHASH_EXIT_FAILURE
+ */
 int pixel_values(VipsImage* img, int *out_arr, size_t height, size_t width)
 {
     assert(img != NULL);
@@ -74,12 +98,16 @@ int pixel_values(VipsImage* img, int *out_arr, size_t height, size_t width)
     return IMGHASH_EXIT_SUCCESS;
 }
 
-/* 
-    Return a pointer to a new VipsImage containing the scaled contents 
-    of the original. The dimensions of the new image will be width_new x height_new.
-
-    The resulting VipsImage* must be freed using g_object_unref()
-*/
+/**
+ * Return a pointer to a new VipsImage containing the contents of 
+ * the original, scaled to the width_new * height_new.
+ * 
+ * @param orig A pointer to a fully initialized VipsImage.
+ * @param width_new The desired width of the new image in pixels.
+ * @param height_new The desired height of the new image in pixels.
+ * @return A pointer to a newly allocated VipsImage containing a scaled
+ *          copy of the original image. Must be freed via g_object_unref() 
+ */
 VipsImage* resize(VipsImage* orig, size_t width_new, size_t height_new)
 {
     assert(orig!= NULL);
@@ -99,12 +127,14 @@ VipsImage* resize(VipsImage* orig, size_t width_new, size_t height_new)
     return out;
 }
 
-/* 
-    Return a pointer to a new VipsImage containing the data of orig,
-    where color bands have been converted to grayscale.
-
-    The resulting VipsImage* must be freed using g_object_unref()
-*/
+/**
+ * Produce a grayscaled copy of the input image.
+ * 
+ * @param orig A pointer to a fully initialized VipsImage.
+ * @return A pointer to a newly allocated copy of the original VipsImage,
+ *          where the colorspace has been converted to grayscale. Must
+ *          be freed with g_object_unref()
+ */
 VipsImage* convert_to_grayscale(VipsImage* orig)
 {
     assert(orig != NULL);
@@ -114,10 +144,15 @@ VipsImage* convert_to_grayscale(VipsImage* orig)
     return out;
 }
 
-/*
-    Iterate the pixel values in img and compute a bit string where each bit is
-    1 if the pixel is lighter than the image's average value, else 0.
-*/
+/**
+ * Iterate the pixel values in the input image and compute a bit string where 
+ * each bit is 1 if the pixel is lighter than the image's average value, else 0.
+ * 
+ * @param img A pointer to a fully initialized VipsImage.
+ * @param height The height of the input image in pixels.
+ * @param width The width of the input image in pixels.
+ * @return The hash value of this image.
+ */
 static uint64_t compute_bit_string_ahash(VipsImage* img, const unsigned int height, const unsigned int width)
 {
     assert(img != NULL);
@@ -146,10 +181,15 @@ static uint64_t compute_bit_string_ahash(VipsImage* img, const unsigned int heig
     return hashval;
 }
 
-/*
-    Iterate the pixel values in img and compute a bit string where each bit is:
-    1 if the pixel is lighter than the immediate next pixel, else 0. 
-*/
+/**
+ * Iterate the pixel values in img and compute a bit string where each bit is:
+ * 1 if the pixel is lighter than the immediate next pixel, else 0. 
+ * 
+ * @param img A pointer to a fully initialized VipsImage.
+ * @param height The height of the input image in pixels.
+ * @param width The width of the input image in pixels.
+ * @return The hash value of this image.
+ */
 static uint64_t compute_bit_string_dhash(VipsImage* img, const unsigned int height, const unsigned int width)
 {
     assert(img != NULL);
@@ -175,7 +215,12 @@ static uint64_t compute_bit_string_dhash(VipsImage* img, const unsigned int heig
     return hashval;
 }
 
-/* Calculate an average hash from the pixels in img. */
+/** 
+ * Calculate an average hash from the pixels in img. 
+ * 
+ * @param img A pointer to a fully initialized VipsImage.
+ * @return The hash value of this image.
+ */
 uint64_t ahash(VipsImage* img)
 {
     if (img == NULL) {
@@ -201,7 +246,12 @@ uint64_t ahash(VipsImage* img)
     return hashval;
 }
 
-/* Calculate a difference hash from the pixels in img. */
+/** 
+ * Calculate a difference hash from the pixels in img. 
+ * 
+ * @param img A pointer to a fully initialized VipsImage.
+ * @return The hash value of this image.
+ */
 uint64_t dhash(VipsImage* img)
 {
     if (img == NULL) {
@@ -230,7 +280,12 @@ uint64_t dhash(VipsImage* img)
     return hashval;
 }
 
-/* Open the image file located at filename and calculate an average hash. */
+/** 
+ * Open the image file located at filename and calculate an average hash. 
+ * 
+ * @param filename The path of an image file to open and read.
+ * @return The average hash of this image. Returns 0 if there is an error.
+ */
 uint64_t ahash_from_file(char* filename)
 {
     VipsImage* img = vips_image_new_from_file(filename, NULL);
@@ -242,7 +297,12 @@ uint64_t ahash_from_file(char* filename)
     return value;
 }
 
-/* Open the image file located at filename and calculate a difference hash. */
+/** 
+ * Open the image file located at filename and calculate a difference hash. 
+ * 
+ * @param filename The path of an image file to open and read.
+ * @return The difference hash of this image. Returns 0 if there is an error.
+ */
 uint64_t dhash_from_file(char* filename)
 {
     VipsImage* img = vips_image_new_from_file(filename, NULL);
@@ -254,7 +314,17 @@ uint64_t dhash_from_file(char* filename)
     return value;
 }
 
-/* Return the Hamming distance between the two hash values, lhs and rhs */
+/** 
+ * Compute the Hamming distance between the two hash values
+ * 
+ * The Hamming distance is the number of differing bits, so
+ * a distance of 0 indicates two identical hashes, and a distance
+ * of 64 is two completely orthogonal hashes. 
+ * 
+ * @param lhs A hash value to be used as the left operand.
+ * @param rhs A hash value to be used as the right operand.
+ * @return The hamming distance between lhs and rhs. 
+ */
 unsigned int distance(uint64_t lhs, uint64_t rhs)
 {
     if (lhs == rhs) {

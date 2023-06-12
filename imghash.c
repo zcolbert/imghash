@@ -16,8 +16,8 @@
 #include "imghash.h"
 
 
-int sum(int* values, size_t len)
 /* Return the sum of values */
+int sum(int* values, size_t len)
 {
     int sum = 0;
     for (size_t i=0; i<len; ++i) {
@@ -26,26 +26,26 @@ int sum(int* values, size_t len)
     return sum;
 }
 
-float average(int* values, size_t len)
 /* Return the average of values */
+float average(int* values, size_t len)
 {
     return (float)sum(values, len) / (float)len;
 }
 
-double scale_factor(int dim_new, int dim_current)
 /* 
     Return the multiplication factor required to produce dim_new 
     from dim_current via: dim_new = dim_current * scale_factor 
 */
+double scale_factor(int dim_new, int dim_current)
 {
     return (double)dim_new/(double)dim_current;
 }
 
-int pixel_values(VipsImage* img, int *out_arr, size_t height, size_t width)
 /* 
     Populate out_arr with integers representing the value of each pixel in img.
     The length of out_arr must be equal to height * width.
 */
+int pixel_values(VipsImage* img, int *out_arr, size_t height, size_t width)
 {
     assert(img != NULL);
 
@@ -74,13 +74,13 @@ int pixel_values(VipsImage* img, int *out_arr, size_t height, size_t width)
     return IMGHASH_EXIT_SUCCESS;
 }
 
-VipsImage* resize(VipsImage* orig, size_t width_new, size_t height_new)
 /* 
     Return a pointer to a new VipsImage containing the scaled contents 
     of the original. The dimensions of the new image will be width_new x height_new.
 
     The resulting VipsImage* must be freed using g_object_unref()
 */
+VipsImage* resize(VipsImage* orig, size_t width_new, size_t height_new)
 {
     assert(orig!= NULL);
 
@@ -99,13 +99,13 @@ VipsImage* resize(VipsImage* orig, size_t width_new, size_t height_new)
     return out;
 }
 
-VipsImage* convert_to_grayscale(VipsImage* orig)
 /* 
     Return a pointer to a new VipsImage containing the data of orig,
     where color bands have been converted to grayscale.
 
     The resulting VipsImage* must be freed using g_object_unref()
 */
+VipsImage* convert_to_grayscale(VipsImage* orig)
 {
     assert(orig != NULL);
 
@@ -114,11 +114,11 @@ VipsImage* convert_to_grayscale(VipsImage* orig)
     return out;
 }
 
-static uint64_t compute_bit_string_ahash(VipsImage* img, const unsigned int height, const unsigned int width)
 /*
     Iterate the pixel values in img and compute a bit string where each bit is
     1 if the pixel is lighter than the image's average value, else 0.
 */
+static uint64_t compute_bit_string_ahash(VipsImage* img, const unsigned int height, const unsigned int width)
 {
     assert(img != NULL);
 
@@ -146,11 +146,11 @@ static uint64_t compute_bit_string_ahash(VipsImage* img, const unsigned int heig
     return hashval;
 }
 
-static uint64_t compute_bit_string_dhash(VipsImage* img, const unsigned int height, const unsigned int width)
 /*
     Iterate the pixel values in img and compute a bit string where each bit is:
     1 if the pixel is lighter than the immediate next pixel, else 0. 
 */
+static uint64_t compute_bit_string_dhash(VipsImage* img, const unsigned int height, const unsigned int width)
 {
     assert(img != NULL);
 
@@ -175,8 +175,8 @@ static uint64_t compute_bit_string_dhash(VipsImage* img, const unsigned int heig
     return hashval;
 }
 
-uint64_t ahash(VipsImage* img)
 /* Calculate an average hash from the pixels in img. */
+uint64_t ahash(VipsImage* img)
 {
     if (img == NULL) {
         return 0;
@@ -201,8 +201,8 @@ uint64_t ahash(VipsImage* img)
     return hashval;
 }
 
-uint64_t dhash(VipsImage* img)
 /* Calculate a difference hash from the pixels in img. */
+uint64_t dhash(VipsImage* img)
 {
     if (img == NULL) {
         return 0;
@@ -230,8 +230,8 @@ uint64_t dhash(VipsImage* img)
     return hashval;
 }
 
-uint64_t ahash_from_file(char* filename)
 /* Open the image file located at filename and calculate an average hash. */
+uint64_t ahash_from_file(char* filename)
 {
     VipsImage* img = vips_image_new_from_file(filename, NULL);
     if (img == NULL) {
@@ -242,8 +242,8 @@ uint64_t ahash_from_file(char* filename)
     return value;
 }
 
-uint64_t dhash_from_file(char* filename)
 /* Open the image file located at filename and calculate a difference hash. */
+uint64_t dhash_from_file(char* filename)
 {
     VipsImage* img = vips_image_new_from_file(filename, NULL);
     if (img == NULL) {
@@ -254,8 +254,8 @@ uint64_t dhash_from_file(char* filename)
     return value;
 }
 
-unsigned int distance(uint64_t lhs, uint64_t rhs)
 /* Return the Hamming distance between the two hash values, lhs and rhs */
+unsigned int distance(uint64_t lhs, uint64_t rhs)
 {
     if (lhs == rhs) {
         return 0;
